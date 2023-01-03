@@ -1,13 +1,18 @@
 ## Install
-- RabbitMQ 도커 컨테이너 실행
-> 웹 콘솔 포트: 15672
-> AMQP 포트: 5672
-`$ docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management-alpine`
 
---
+- RabbitMQ 도커 컨테이너 실행 `웹 콘솔 포트: 15672, AMQP 포트: 5672`
+```
+$ docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management-alpine
+```
+
+
+---
 ## Setting (RabbitmqConfig, build.gradle, application.properties)
 - build. gradle
-`implementation "org.springframework.boot:spring-boot-starter-amqp"`
+```            
+implementation 'org.springframework.boot:spring-boot-starter-amqp'
+```
+
 - application.properties
 ```
 spring.rabbitmq.host = localhost
@@ -21,10 +26,7 @@ spring.rabbitmq.password = guest
 package com.vitcon.core.config;
 
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -38,7 +40,7 @@ import org.springframework.context.annotation.Configuration;
 class RabbitmqConfig {
 
     private static final String queueName = "hello.queue";
-    private static final String directExchangeName = "hello.message";
+    private static final String exchangeName = "hello.message";
     private static final String routingKey = "hello.key";
 
     @Value("${spring.rabbitmq.host}")
@@ -57,13 +59,13 @@ class RabbitmqConfig {
     }
 
     @Bean
-    DirectExchange directExchange() {
-        return new DirectExchange(directExchangeName);
+    TopicExchange directExchange() {
+        return new TopicExchange(exchangeName);
     }
 
     @Bean
-    Binding binding(DirectExchange directExchange, Queue queue) {
-        return BindingBuilder.bind(queue).to(directExchange).with(routingKey);
+    Binding binding(TopicExchange topicExchange, Queue queue) {
+        return BindingBuilder.bind(queue).to(topicExchange).with(routingKey);
     }
 
 
@@ -90,7 +92,7 @@ class RabbitmqConfig {
     }
 }
 ```
---
+---
 ## Use (Controller + Service)
 
 ```
@@ -110,6 +112,12 @@ public void receiveMessage(String message) {
 
 ```
 
+---
+## REFERENCE
+ - RabbitMQ 사용 이유
+ https://mio-java.tistory.com/50
 
-- REFERENCE
-> https://jsonobject.tistory.com/560
+ - RabbitMQ 연동 코드
+ https://jsonobject.tistory.com/560
+ https://chamggae.tistory.com/164
+
