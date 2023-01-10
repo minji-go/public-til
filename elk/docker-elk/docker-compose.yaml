@@ -2,6 +2,7 @@ version: '3.7'
 
 services:
   elasticsearch:
+    container_name: elasticsearch
     image: elasticsearch:7.17.0
     environment:
       discovery.type: single-node
@@ -10,8 +11,17 @@ services:
       - 9200:9200
 
   logstash:
+    container_name: logstash
     image: logstash:7.17.0
     volumes:
       - ./elk/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
       - ./elk/logstash/mysql-connector-java-8.0.28.jar:/usr/share/logstash/mysql-connector-java-8.0.28.jar
       - ./elk/logstash/template-board.json:/usr/share/logstash/template.json
+
+  kibana:
+    container_name: kibana
+    image: kibana:7.17.0
+    volumes:
+      - ./elk/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - 5601:5601

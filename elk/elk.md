@@ -20,6 +20,7 @@
     ```
 
 4. Logstash와 MySQL 연동
+    - logstash/logstash.conf
     ```
     ```
 
