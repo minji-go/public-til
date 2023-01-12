@@ -24,7 +24,7 @@ spring.mqtt.password = guest
 ```
 
 - MqttConfig
-```
+```java
 package com.edgecross.core.config;
 
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
@@ -96,8 +96,72 @@ public class MqttConfig {
             System.out.println("Payload" + message.getPayload());
         };
     }
+
+    @Bean
+    public MessageChannel mqttOutboundChannel() {
+        return new DirectChannel();
+    }
+
+    @Bean
+    @ServiceActivator(inputChannel = "mqttOutboundChannel")
+    public MessageHandler mqttOutbound(DefaultMqttPahoClientFactory clientFactory) {
+        MqttPahoMessageHandler messageHandler =
+                new MqttPahoMessageHandler(MQTT_CLIENT_ID, clientFactory);
+        messageHandler.setAsync(true);
+        messageHandler.setDefaultQos(1);
+        return messageHandler;
+    }
+
+    @MessagingGateway(defaultRequestChannel = "mqttOutboundChannel")
+    public interface OutboundGateway {
+        void sendToMqtt(String data, @Header(MqttHeaders.TOPIC) String topic);
+    }
+
 }
 ```
+---
+## USE
+```java
+package com.edgecross.controller;
+
+import com.edgecross.core.config.MqttConfig;
+import com.edgecross.dto.MqttMessage;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.Instant;
+
+@RestController
+public class mqttController {
+
+    @Autowired
+    private MqttConfig.OutboundGateway outboundGateway;
+    @Autowired
+    private ObjectMapper objectMapper;
+    private final String TOPIC_PREFIX = "scautr/req/";
+
+    @GetMapping("/control")
+    public String controlPower(@RequestBody MqttMessage mqttMessage) throws JSONException, JsonProcessingException {
+
+        String mac = "OCDC781ABC41";
+        Instant current = Instant.now();
+        mqttMessage.setTs(current.toEpochMilli());
+
+        outboundGateway.sendToMqtt(
+                objectMapper.writeValueAsString(mqttMessage),
+                TOPIC_PREFIX + mac);
+
+        return "OK";
+    }
+
+}
+```
+
 ---
 ## REFERENCE
 - Springboot Mqtt 코드

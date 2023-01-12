@@ -22,7 +22,7 @@ spring.rabbitmq.password = guest
 ```
 
 - RabbitmqConfig
-```
+```java
 package com.vitcon.core.config;
 
 
@@ -95,7 +95,7 @@ class RabbitmqConfig {
 ---
 ## Use (Controller + Service)
 
-```
+```java
 @Autowired
 private RabbitTemplate rabbitTemplate;
 
