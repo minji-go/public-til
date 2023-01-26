@@ -51,7 +51,8 @@ public class MqttConfig {
     private String password;
     @Value("${spring.mqtt.url}")
     private String url;
-    private static final String MQTT_CLIENT_ID = MqttAsyncClient.generateClientId();
+    private static final String MQTT_SUB_CLIENT_ID = MqttAsyncClient.generateClientId();
+    private static final String MQTT_PUB_CLIENT_ID = MqttAsyncClient.generateClientId();
     private static final String TOPIC_FILTER = "test/#";
 
     private MqttConnectOptions connectOptions() {
@@ -79,7 +80,7 @@ public class MqttConfig {
     public MessageProducer inboundChannel() {
 
         MqttPahoMessageDrivenChannelAdapter adapter =
-                new MqttPahoMessageDrivenChannelAdapter(MQTT_CLIENT_ID, defaultMqttPahoClientFactory(), TOPIC_FILTER);
+                new MqttPahoMessageDrivenChannelAdapter(MQTT_SUB_CLIENT_ID, defaultMqttPahoClientFactory(), TOPIC_FILTER);
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);
@@ -106,7 +107,7 @@ public class MqttConfig {
     @ServiceActivator(inputChannel = "mqttOutboundChannel")
     public MessageHandler mqttOutbound(DefaultMqttPahoClientFactory clientFactory) {
         MqttPahoMessageHandler messageHandler =
-                new MqttPahoMessageHandler(MQTT_CLIENT_ID, clientFactory);
+                new MqttPahoMessageHandler(MQTT_PUB_CLIENT_ID, clientFactory);
         messageHandler.setAsync(true);
         messageHandler.setDefaultQos(1);
         return messageHandler;
@@ -169,3 +170,7 @@ https://kdevkr.github.io/spring-boot-integration-mqtt/
 https://docs.spring.io/spring-integration/reference/html/mqtt.html#mqtt
 - MqttSercurityException: 연결할 수 있는 권한이 부여되지 않음
 https://stackoverflow.com/questions/63737765/mqtt-and-springboot-integration-connection-lost
+- Spring Integration
+https://www.youtube.com/watch?v=9PsBxz28PIo
+- Publish 했을 때, Lost connection
+https://velog.io/@chullll/Spring-Project-%EB%B9%84%EB%8F%99%EA%B8%B0%ED%99%94-%EC%B2%98%EB%A6%AC-mqtt-%EC%97%B0%EA%B2%B0-%EC%9E%A5%EC%95%A0
