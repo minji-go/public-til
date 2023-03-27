@@ -7,6 +7,9 @@ https://www.44bits.io/ko/post/why-should-i-use-docker-container
 - docker images : 이미지 확인  
 <br>
 
+- docker pull IMAGE:VERSION
+
+
 - docker run --name NAME -p 8080:80 IMAGE : 컨테이너 실행(host 포트 8080과 컨테이너 포트 80 연결)
 - docker run --name NAME -v ~/Desktop/htdocs:/usr/local/apache2/htdocs IMAGE: 컨테이너 실행(host의 파일시스템과 컨테이너의 파일시스템 연동=host 파일수정시 바로반영)
 - docker exec -it CONTAINER /bin/sh: 컨테이너 지속적 접속
@@ -18,9 +21,11 @@ https://www.44bits.io/ko/post/why-should-i-use-docker-container
 - docker rmi CONTAINER : 이미지 삭제 
 - docker stop $(docker ps -a -q) : 전체 컨테이너 STOP 
 - docker rm $(docker ps -a -q) : 전체 컨테이너 삭제
+- docker system prune -a : 전부삭제
+- docker rmi $(docker images -f "dangling=true" -q) : 이미지<none> 삭제
 - docker logs CONTAINER
 <br>
-
+- docker-compose -f docker-compose-dev.yml build : 특정 docker-compose 파일지정
 - docker-compose build 
 - docker-compose up -d 
 - doxker-compose down
